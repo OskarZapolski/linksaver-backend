@@ -1,0 +1,4 @@
+
+### --- KONFIGURACJA TESTÓW ---
+@baseUrl = http://localhost:8080
+@token = eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJvc2thckB0ZXN0LnBsIiwiaWF0IjoxNzc1NDEzNjkwLCJleHAiOjE3NzU0MTQ1OTB9.y9THXHF9MVmTv15QPqc-JwZgEd5iuf7ZVFUhnPf80GI
