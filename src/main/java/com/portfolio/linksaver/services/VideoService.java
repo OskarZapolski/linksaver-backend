@@ -41,8 +41,9 @@ public class VideoService {
             String category = (String) stats[0];
             Long count = (Long) stats[1];
             String thumbnailImage = (String) stats[2];
+            LocalDateTime saveDate = (LocalDateTime) stats[3];
 
-            CategoryResponse categoryResponse = new CategoryResponse(category, count, thumbnailImage);
+            CategoryResponse categoryResponse = new CategoryResponse(category, count, thumbnailImage, saveDate);
             listCategoryResponses.add(categoryResponse);
         }
 

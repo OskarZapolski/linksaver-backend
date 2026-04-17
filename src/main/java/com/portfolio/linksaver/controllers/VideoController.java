@@ -19,7 +19,6 @@ import com.portfolio.linksaver.repositories.UserRepository;
 import com.portfolio.linksaver.services.VideoService;
 
 import jakarta.validation.Valid;
-import org.springframework.web.bind.annotation.RequestParam;
 
 @RestController
 public class VideoController {
