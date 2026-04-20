@@ -12,9 +12,9 @@ import java.util.List;
 @Repository
 public interface VideoRepository extends JpaRepository<Video, Long> {
 
-    @Query("SELECT v.category, COUNT(v), v.imageUrl, v.saveDate" +
-            "FROM Video v" +
-            "WHERE v.user.userId = :userId" +
+    @Query("SELECT v.category, COUNT(v), v.imageUrl, v.saveDate " +
+            "FROM Video v " +
+            "WHERE v.user.userId = :userId " +
             "GROUP BY v.category")
     List<Object[]> findCategoryStatsByUserId(@Param("userId") Long userId);
 
