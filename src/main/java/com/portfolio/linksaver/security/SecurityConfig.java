@@ -7,41 +7,32 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 import com.portfolio.linksaver.services.OAuth2Service;
 
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
-    private final OAuth2Service oAuth2Service;
-    private final OAuth2LogInSuccessHandler oAuth2LogInSuccessHandler;
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
 
-    public SecurityConfig(OAuth2Service oAuth2Service, OAuth2LogInSuccessHandler oAuth2LogInSuccessHandler, 
-        JwtAuthenticationFilter jwtAuthenticationFilter
-    ) {
-        this.oAuth2Service = oAuth2Service;
-        this.oAuth2LogInSuccessHandler = oAuth2LogInSuccessHandler;
+    public SecurityConfig(JwtAuthenticationFilter jwtAuthenticationFilter) {
         this.jwtAuthenticationFilter = jwtAuthenticationFilter;
     }
-    
+
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http.csrf(csrf -> csrf.disable())
-        .sessionManagement(session -> session.sessionCreationPolicy(org.springframework.security.config.http.SessionCreationPolicy.STATELESS))
-        .authorizeHttpRequests(auth -> auth
-            .requestMatchers("/test", "/register", "/log-in", "/auth/refresh-token", "/error").permitAll()
-            .anyRequest().authenticated()
-        )
-        .addFilterBefore(jwtAuthenticationFilter, org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter.class)
-        .oauth2Login(oAuth2 -> oAuth2
-            .userInfoEndpoint(userInfo -> userInfo
-                .userService(oAuth2Service)
-            ).successHandler(oAuth2LogInSuccessHandler)
-        );
+                .sessionManagement(session -> session.sessionCreationPolicy(
+                        org.springframework.security.config.http.SessionCreationPolicy.STATELESS))
+                .authorizeHttpRequests(auth -> auth
+                        .requestMatchers("/test", "/register", "/log-in", "/auth/refresh-token", "/error", "/oAuth2")
+                        .permitAll()
+                        .anyRequest().authenticated())
+                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
         // .rememberMe(remember -> remember
-        //     .key("superTajnyKluczDoSzyfrowaniaCiasteczek123")
-        //     .tokenValiditySeconds(2592000)
+        // .key("superTajnyKluczDoSzyfrowaniaCiasteczek123")
+        // .tokenValiditySeconds(2592000)
         // );
 
         return http.build();
