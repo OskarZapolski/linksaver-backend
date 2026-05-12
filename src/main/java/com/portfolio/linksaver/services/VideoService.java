@@ -2,6 +2,7 @@ package com.portfolio.linksaver.services;
 
 import com.portfolio.linksaver.dto.CategoryResponse;
 import com.portfolio.linksaver.dto.NewLink;
+import com.portfolio.linksaver.dto.VideoResponse;
 import com.portfolio.linksaver.dto.VideoScrapedData;
 import com.portfolio.linksaver.entities.User;
 import com.portfolio.linksaver.entities.Video;
@@ -28,8 +29,8 @@ public class VideoService {
 
     }
 
-    public List<Video> extractUserVideos(User user) {
-        return videoRepository.findAllByUser(user);
+    public List<VideoResponse> extractUserVideos(String category, User user) {
+        return videoRepository.findVideosByCategory(category, user);
     }
 
     public List<CategoryResponse> extractVideoInformation(User user) {

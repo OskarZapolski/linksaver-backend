@@ -7,12 +7,14 @@ import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import org.springframework.security.core.context.SecurityContextHolder;
 
 import com.portfolio.linksaver.dto.CategoryResponse;
 import com.portfolio.linksaver.dto.NewLink;
+import com.portfolio.linksaver.dto.VideoResponse;
 import com.portfolio.linksaver.entities.User;
 import com.portfolio.linksaver.entities.Video;
 import com.portfolio.linksaver.repositories.UserRepository;
@@ -48,11 +50,11 @@ public class VideoController {
 
     }
 
-    @GetMapping("/get-videos")
-    public ResponseEntity<List<Video>> extractVideos() {
+    @GetMapping("/get-category-videos")
+    public ResponseEntity<List<VideoResponse>> extractVideos(@RequestParam("category") String category) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         User user = (User) auth.getPrincipal();
-        return ResponseEntity.ok(videoService.extractUserVideos(user));
+        return ResponseEntity.ok(videoService.extractUserVideos(category, user));
     }
 
     @GetMapping("/test")

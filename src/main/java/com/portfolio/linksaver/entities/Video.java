@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
@@ -19,7 +20,7 @@ import lombok.Setter;
 public class Video {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY) // automaticly postgresql will add Id
-    //without creating new db table to calculate new Id
+    // without creating new db table to calculate new Id
     @Setter(AccessLevel.NONE)
     private Long videoId;
     @Column(columnDefinition = "TEXT")
@@ -29,9 +30,10 @@ public class Video {
     @Column(columnDefinition = "TEXT")
     private String imageUrl;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
     private User user;
 
-    public Video(){}
+    public Video() {
+    }
 }
