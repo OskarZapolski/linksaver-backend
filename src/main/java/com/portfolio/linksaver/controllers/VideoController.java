@@ -1,6 +1,8 @@
 package com.portfolio.linksaver.controllers;
 
+import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -58,18 +60,58 @@ public class VideoController {
     }
 
     @GetMapping("/test")
-    public String tester() {
-        System.out.println("RADAR 1: Wszedłem do kontrolera!");
-        NewLink newLink = new NewLink();
-        User user = new User();
+    public String addTestLinks() {
+        System.out.println("RADAR 1: Szukam użytkownika x@gmail.com...");
 
-        user.setUserName("testowy");
-        userRepository.save(user);
-        System.out.println("RADAR 3: User zapisany pomyślnie! ID: " + user.getUserId());
-        newLink.setUrl("https://www.instagram.com/reel/DV5LLJEjmcU/?utm_source=ig_web_copy_link&igsh=NTc4MTIwNjQ2YQ==");
-        System.out.println("RADAR 4: Wywołuję Kucharza (VideoService)...");
-        videoService.processVideo(newLink, user);
-        System.out.println("RADAR 5: Kucharz skończył pracę!");
-        return "zrobione";
+        // UWAGA: Zakładam, że masz w UserRepository metodę findByEmail!
+        Optional<User> optionalUser = userRepository.findByEmail("x@gmail.com");
+
+        if (optionalUser.isEmpty()) {
+            return "BŁĄD: Nie znaleziono użytkownika x@gmail.com w bazie!";
+        }
+
+        User user = optionalUser.get();
+        System.out.println("RADAR 2: Znaleziono użytkownika! ID: " + user.getUserId());
+
+        // Tutaj wklej PRAWDZIWE linki z TikToka (jeśli dasz fake'owe, Twój scraper może
+        // wyrzucić błąd)
+        List<String> testUrls = Arrays.asList(
+                "https://www.tiktok.com/@ewa.masterchef/video/7612346918861081878?is_from_webapp=1&sender_device=pc", // Tu
+                                                                                                                      // podmień
+                                                                                                                      // na
+                                                                                                                      // swoje
+                "https://www.tiktok.com/@waszek_mati/video/7618131117522111777?is_from_webapp=1&sender_device=pc", // Tu
+                                                                                                                   // podmień
+                                                                                                                   // na
+                                                                                                                   // swoje
+                "https://www.tiktok.com/@kizo_boss_mts/video/7620445316940156192?is_from_webapp=1&sender_device=pc",
+                "https://youtube.com/shorts/_ij3o1RA8IY?si=nKX6tB_sSTdEL3Yo",
+                "https://youtube.com/shorts/qRVqlI576FE?si=xDxMPRuuf_vHUL0i"// Tu podmień na swoje
+        );
+
+        // Kategoria (jeśli NewLink przyjmuje też kategorię, żeby przypisać do różnych)
+        List<String> categories = Arrays.asList("Gry", "Muzyka", "Edukacja");
+
+        System.out.println("RADAR 3: Zaczynam dodawać linki...");
+
+        for (int i = 0; i < testUrls.size(); i++) {
+            NewLink newLink = new NewLink();
+            newLink.setUrl(testUrls.get(i));
+
+            // Jeśli w Twoim DTO "NewLink" dodajesz od razu kategorię, odkomentuj to:
+            // newLink.setCategory(categories.get(i));
+
+            System.out.println("RADAR 4." + (i + 1) + ": Kucharz gotuje link " + (i + 1) + "...");
+
+            try {
+                videoService.processVideo(newLink, user);
+                System.out.println(" Sukces dla linku " + (i + 1));
+            } catch (Exception e) {
+                System.out.println(" BŁĄD przy linku " + (i + 1) + ": " + e.getMessage());
+            }
+        }
+
+        System.out.println("RADAR 5: Wszystkie linki przetworzone!");
+        return "Zrobione! Odśwież teraz aplikację na telefonie i sprawdź HomeScreen!";
     }
 }

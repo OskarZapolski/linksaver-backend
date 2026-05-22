@@ -14,13 +14,14 @@ import com.portfolio.linksaver.dto.VideoResponse;
 @Repository
 public interface VideoRepository extends JpaRepository<Video, Long> {
 
-    @Query("SELECT v.category, COUNT(v), v.imageUrl, v.saveDate " +
+    @Query("SELECT v.category, COUNT(v), MAX(v.imageUrl), MAX(v.saveDate) " +
             "FROM Video v " +
             "WHERE v.user.userId = :userId " +
             "GROUP BY v.category")
     List<Object[]> findCategoryStatsByUserId(@Param("userId") Long userId);
 
-    @Query("SELECT new com.portfolio.linksaver.dto.VideoResponse(v.category, v.saveDate, v.imageUrl, v.url)  " +
+    @Query("SELECT new com.portfolio.linksaver.dto.VideoResponse(v.videoId, v.category, v.saveDate, v.imageUrl, v.url)  "
+            +
             "FROM Video v " +
             "WHERE v.category = :category AND v.user = :user " +
             "ORDER BY v.saveDate DESC")
