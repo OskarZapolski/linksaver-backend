@@ -30,11 +30,17 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         this.userRepository = userRepository;
         this.jwtService = jwtService;
     }
-    
-    @Override 
+
+    @Override
     public void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
-            FilterChain filterChain) throws ServletException, IOException
-    {
+            FilterChain filterChain) throws ServletException, IOException {
+
+        String path = request.getServletPath();
+        if (path.contains("/log-in") || path.contains("/register")) {
+            filterChain.doFilter(request, response);
+            return;
+        }
+
         final String authHeader = request.getHeader("Authorization");
 
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
@@ -43,19 +49,18 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         }
         final String jwtToken = authHeader.substring(7);
         final String jwtEmail = jwtService.extractEmail(jwtToken);
-        
+
         Optional<User> possibleUser = userRepository.findByEmail(jwtEmail);
 
         if (possibleUser.isEmpty()) {
             return;
         }
         User user = possibleUser.get();
-        if(jwtService.isTokenValid(jwtToken, user)) {
+        if (jwtService.isTokenValid(jwtToken, user)) {
             UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
-                user,
-                null,
-                List.of(new SimpleGrantedAuthority(user.getRole()))
-            );
+                    user,
+                    null,
+                    List.of(new SimpleGrantedAuthority(user.getRole())));
             authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
 
             SecurityContextHolder.getContext().setAuthentication(authToken);
@@ -63,6 +68,5 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         filterChain.doFilter(request, response);
 
     }
-
 
 }

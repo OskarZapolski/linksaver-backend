@@ -11,11 +11,13 @@ import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken;
 import com.google.api.client.googleapis.auth.oauth2.GoogleIdTokenVerifier;
 import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.client.json.gson.GsonFactory;
-import com.google.api.client.util.Value;
+import org.springframework.beans.factory.annotation.Value;
 import com.portfolio.linksaver.dto.Tokens;
 import com.portfolio.linksaver.entities.User;
 import com.portfolio.linksaver.enums.AuthProvider;
 import com.portfolio.linksaver.repositories.UserRepository;
+
+import jakarta.transaction.Transactional;
 
 @Service
 public class OAuth2Service {
@@ -23,8 +25,8 @@ public class OAuth2Service {
     private final UserRepository userRepository;
     private final JwtService jwtService;
 
-    @Value("${spring.security.oauth2.client.registration.google.client-id}")
-    private String googleId;
+    @Value("${google.client.id}")
+    private String googleClientId;
 
     public OAuth2Service(UserRepository userRepository, JwtService jwtService) {
         this.userRepository = userRepository;
@@ -32,11 +34,12 @@ public class OAuth2Service {
 
     }
 
+    @Transactional
     public Tokens authenticateWithGoogle(String token) {
         try {
             GoogleIdTokenVerifier googleIdTokenVerifier = new GoogleIdTokenVerifier.Builder(
                     new NetHttpTransport(), new GsonFactory())
-                    .setAudience(Collections.singletonList(googleId))
+                    .setAudience(Collections.singletonList(googleClientId))
                     .build();
             GoogleIdToken idToken = googleIdTokenVerifier.verify(token);
 
@@ -61,15 +64,19 @@ public class OAuth2Service {
         String email = payload.getEmail();
         String name = (String) payload.get("name");
 
+        String pictureUrl = (String) payload.get("picture");
+
         Optional<User> userOptional = userRepository.findByEmail(email);
         if (!userOptional.isEmpty()) {
             User user = userOptional.get();
             user.setUserName(name);
+            user.setAvatarUrl(pictureUrl);
             return user;
         } else {
             User user = new User();
             user.setEmail(email);
             user.setUserName(name);
+            user.setAvatarUrl(pictureUrl);
             user.setAuthProvider(AuthProvider.GOOGLE);
             userRepository.save(user);
             return user;

@@ -28,12 +28,15 @@ public class User {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Setter(AccessLevel.NONE)
     private Long userId;
-    
+
     private String userName;
     private String password;
 
     @Column(unique = true)
     private String email;
+
+    @Column(name = "avatar_url")
+    private String avatarUrl;
 
     private String role = "Role_User";
 
@@ -44,11 +47,12 @@ public class User {
     @Setter(AccessLevel.NONE)
     private List<Video> videos = new ArrayList<>();
 
-    public User(){}
+    public User() {
+    }
 
-    public void addVideo(Video video) { //updating videos in method so you always will have updated videos
+    public void addVideo(Video video) { // updating videos in method so you always will have updated videos
         this.videos.add(video);
         video.setUser(this);
     }
-    
+
 }

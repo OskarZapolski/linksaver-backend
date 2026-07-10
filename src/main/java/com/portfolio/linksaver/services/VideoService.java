@@ -6,12 +6,16 @@ import com.portfolio.linksaver.dto.VideoResponse;
 import com.portfolio.linksaver.dto.VideoScrapedData;
 import com.portfolio.linksaver.entities.User;
 import com.portfolio.linksaver.entities.Video;
+import com.portfolio.linksaver.repositories.UserRepository;
 import com.portfolio.linksaver.repositories.VideoRepository;
+
+import jakarta.transaction.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -20,17 +24,15 @@ public class VideoService {
     private final VideoRepository videoRepository;
     private final AiPromptService aiPromptService;
     private final HtmlScraperService htmlScraperService;
+    private final UserRepository userRepository;
 
     public VideoService(VideoRepository repository,
-            AiPromptService aiPromptService, HtmlScraperService htmlScraperService) {
+            AiPromptService aiPromptService, HtmlScraperService htmlScraperService, UserRepository userRepository) {
         this.videoRepository = repository;
         this.aiPromptService = aiPromptService;
         this.htmlScraperService = htmlScraperService;
+        this.userRepository = userRepository;
 
-    }
-
-    public List<VideoResponse> extractUserVideos(String category, User user) {
-        return videoRepository.findVideosByCategory(category, user);
     }
 
     public List<CategoryResponse> extractVideoInformation(User user) {
@@ -51,8 +53,12 @@ public class VideoService {
         return listCategoryResponses;
     }
 
-    public String processVideo(NewLink newLink, User user) {
+    @Transactional
+    public String processVideo(NewLink newLink, User userFromController) {
         Video video = new Video();
+
+        User user = userRepository.findById(userFromController.getUserId())
+                .orElseThrow(() -> new RuntimeException("nie znaleziono uzytkownika"));
 
         VideoScrapedData videoScrapedData = htmlScraperService.scrapeVideoData(newLink);
         System.out.println("   -> KUCHARZ 3: Scraper wrócił! Payload dla AI to: " + videoScrapedData.getAiPayload());
@@ -62,6 +68,7 @@ public class VideoService {
         video.setCategory(category);
         video.setSaveDate(LocalDateTime.now());
         video.setUrl(newLink.getUrl());
+        video.setUser(user);
         user.addVideo(video);
         System.out.println(category);
 

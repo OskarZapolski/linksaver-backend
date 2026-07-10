@@ -23,8 +23,8 @@ public class HtmlScraperService {
 
     public VideoScrapedData scrapeVideoData(NewLink newLink) {
         VideoScrapedData videoScrapedData = new VideoScrapedData();
-        String title ="";
-        String imageUrl ="";
+        String title = "";
+        String imageUrl = "";
         String aiPayload = "";
 
         if (newLink.getUrl().contains("tiktok.com")) {
@@ -32,7 +32,7 @@ public class HtmlScraperService {
             title = tiktokVideoInfo.getTitle();
             imageUrl = tiktokVideoInfo.getThumbnailUrl();
             aiPayload = title;
-        }else {
+        } else {
             Connection connection = setConnection(newLink);
             try {
                 Document doc = connection.get();
@@ -40,18 +40,21 @@ public class HtmlScraperService {
                 title = getTitle(doc);
                 String description = getDescription(doc);
                 String hashtags = getHashtags(doc);
-                
-                aiPayload = description + " " + hashtags + " " + title;
-                
-            }catch (IOException e) {
-                throw new RuntimeException("Failed to fetch data from the provided URL. The link might be invalid or protected.");
+
+                aiPayload = "Tytuł: " + (title != null ? title : "Brak tytułu") +
+                        ", Tagi: " + (hashtags != null ? hashtags : "Brak tagów");
+
+            } catch (IOException e) {
+                throw new RuntimeException(
+                        "Failed to fetch data from the provided URL. The link might be invalid or protected.");
             }
         }
         videoScrapedData.setAiPayload(aiPayload);
         videoScrapedData.setImageUrl(imageUrl);
         return videoScrapedData;
-        
+
     }
+
     private Connection setConnection(NewLink newLink) {
         Connection connection = Jsoup.connect(newLink.getUrl());
         connection.userAgent("facebookexternalhit/1.1 (+http://www.facebook.com/externalhit_uatext.php)");
@@ -59,18 +62,19 @@ public class HtmlScraperService {
         connection.referrer("http://www.google.com");
         return connection;
     }
-    
+
     private String getThumbnailImageUrl(Document doc) {
         Element thumbnailImage = doc.selectFirst("meta[property=og:image]");
-        if(thumbnailImage == null){
+        if (thumbnailImage == null) {
             thumbnailImage = doc.selectFirst("meta[name=twitter:image]");
         }
-        if(thumbnailImage != null){
+        if (thumbnailImage != null) {
             String imageUrl = thumbnailImage.attr("content");
             return imageUrl;
         }
         return null;
     }
+
     private String getTitle(Document doc) {
         Element title = doc.selectFirst("meta[property=og:title]");
         if (title == null) {
@@ -81,6 +85,7 @@ public class HtmlScraperService {
         }
         return null;
     }
+
     private String getDescription(Document doc) {
         Element description = doc.selectFirst("meta[property=og:description]");
         if (description == null) {
@@ -91,6 +96,7 @@ public class HtmlScraperService {
         }
         return null;
     }
+
     private String getHashtags(Document doc) {
         Element hashtags = doc.selectFirst("meta[name=keywords]");
         if (hashtags != null) {

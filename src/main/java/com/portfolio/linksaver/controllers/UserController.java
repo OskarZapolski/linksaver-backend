@@ -18,8 +18,11 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
 @RestController
 public class UserController {
@@ -34,6 +37,15 @@ public class UserController {
         this.logInUserService = logInUserService;
         this.refreshTokenService = refreshTokenService;
         this.oAuth2Service = oAuth2Service;
+    }
+
+    @GetMapping("/auth/me")
+    public ResponseEntity<Map<String, String>> checkAuth(@AuthenticationPrincipal User user) {
+        Map<String, String> userInfo = new HashMap<>();
+        userInfo.put("name", user.getUserName());
+        userInfo.put("email", user.getEmail());
+        userInfo.put("picture", user.getAvatarUrl() != null ? user.getAvatarUrl() : "");
+        return ResponseEntity.ok(userInfo);
     }
 
     @PostMapping("/register")
