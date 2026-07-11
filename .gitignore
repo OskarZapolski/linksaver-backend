@@ -34,6 +34,6 @@ build/
 
 
 ### My files ###
-application.properties
+
 application-dev.properties
 *.env
