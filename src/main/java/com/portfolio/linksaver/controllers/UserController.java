@@ -73,7 +73,6 @@ public class UserController {
     public ResponseEntity<Map<String, String>> handleRefreshToken(@RequestBody Map<String, String> request) {
         String refreshToken = request.get("refreshToken");
         User user = refreshTokenService.findUserByToken(refreshToken);
-        System.out.print("have user");
         String newAccessToken = refreshTokenService.generateNewAccessToken(refreshToken, user);
         Map<String, String> response = new HashMap<>();
         response.put("accessToken", newAccessToken);

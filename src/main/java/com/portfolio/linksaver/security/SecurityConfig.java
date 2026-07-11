@@ -28,10 +28,6 @@ public class SecurityConfig {
                         .permitAll()
                         .anyRequest().authenticated())
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
-        // .rememberMe(remember -> remember
-        // .key("superTajnyKluczDoSzyfrowaniaCiasteczek123")
-        // .tokenValiditySeconds(2592000)
-        // );
 
         return http.build();
     }

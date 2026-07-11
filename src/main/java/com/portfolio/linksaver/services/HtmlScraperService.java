@@ -38,7 +38,6 @@ public class HtmlScraperService {
                 Document doc = connection.get();
                 imageUrl = getThumbnailImageUrl(doc);
                 title = getTitle(doc);
-                String description = getDescription(doc);
                 String hashtags = getHashtags(doc);
 
                 aiPayload = "Tytuł: " + (title != null ? title : "Brak tytułu") +

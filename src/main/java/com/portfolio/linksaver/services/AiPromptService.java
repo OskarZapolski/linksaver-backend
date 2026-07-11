@@ -9,7 +9,7 @@ import org.springframework.stereotype.Service;
 public class AiPromptService {
     private final ChatClient chatClient;
     private static final String systemCategoryPrompt = """
-            You are an expert in categorizing films by their hashtags. 
+            You are an expert in categorizing films by their hashtags.
             You will analyze hashtags, title and description. Hashtags are the most important content.
             You have only those categories:
             - Science & Education: physics, history, space, math, school, facts
@@ -50,21 +50,20 @@ public class AiPromptService {
             Output ONLY the exact category name from the list above. Do not add any punctuation, conversational text, or explanations. Just the category name.
             """;
 
-
     public AiPromptService(ChatClient.Builder chatBuilder) {
         this.chatClient = chatBuilder.build();
     }
+
     public String promptCategory(String payload) {
         ChatResponse response = chatClient.prompt()
-            .system(systemCategoryPrompt)
-            .user(payload)
-            .options(
-                OpenAiChatOptions.builder()
-                    .temperature(0.0)
-                    .maxTokens(10)
-                    .build()
-            ).call().chatResponse();
-        System.out.println("zuzycie tokenow " + response.getMetadata().getUsage().getTotalTokens());
+                .system(systemCategoryPrompt)
+                .user(payload)
+                .options(
+                        OpenAiChatOptions.builder()
+                                .temperature(0.0)
+                                .maxTokens(10)
+                                .build())
+                .call().chatResponse();
         String category = response.getResult().getOutput().getText();
         return category;
     }

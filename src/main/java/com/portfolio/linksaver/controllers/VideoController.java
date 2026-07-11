@@ -48,8 +48,6 @@ public class VideoController {
 
     @DeleteMapping("/videos/{videoId}")
     public ResponseEntity<?> deleteVideo(@PathVariable Long videoId, @AuthenticationPrincipal User user) {
-        System.out.println(
-                "🚨 DOTARŁEM DO KONTROLERA! PRÓBUJĘ USUNĄĆ FILM ID: " + videoId + " DLA USERA: " + user.getEmail());
         Video video = videoRepository.findByVideoIdAndUser(videoId, user)
                 .orElseThrow(() -> new RuntimeException("Nie znaleziono filmu lub brak dostępu"));
 
@@ -85,59 +83,4 @@ public class VideoController {
         return ResponseEntity.ok(videoPage);
     }
 
-    @GetMapping("/test")
-    public String addTestLinks() {
-        System.out.println("RADAR 1: Szukam użytkownika x@gmail.com...");
-
-        // UWAGA: Zakładam, że masz w UserRepository metodę findByEmail!
-        Optional<User> optionalUser = userRepository.findByEmail("x@gmail.com");
-
-        if (optionalUser.isEmpty()) {
-            return "BŁĄD: Nie znaleziono użytkownika x@gmail.com w bazie!";
-        }
-
-        User user = optionalUser.get();
-        System.out.println("RADAR 2: Znaleziono użytkownika! ID: " + user.getUserId());
-
-        // Tutaj wklej PRAWDZIWE linki z TikToka (jeśli dasz fake'owe, Twój scraper może
-        // wyrzucić błąd)
-        List<String> testUrls = Arrays.asList(
-                "https://www.tiktok.com/@ewa.masterchef/video/7612346918861081878?is_from_webapp=1&sender_device=pc", // Tu
-                                                                                                                      // podmień
-                                                                                                                      // na
-                                                                                                                      // swoje
-                "https://www.tiktok.com/@waszek_mati/video/7618131117522111777?is_from_webapp=1&sender_device=pc", // Tu
-                                                                                                                   // podmień
-                                                                                                                   // na
-                                                                                                                   // swoje
-                "https://www.tiktok.com/@kizo_boss_mts/video/7620445316940156192?is_from_webapp=1&sender_device=pc",
-                "https://youtube.com/shorts/_ij3o1RA8IY?si=nKX6tB_sSTdEL3Yo",
-                "https://youtube.com/shorts/qRVqlI576FE?si=xDxMPRuuf_vHUL0i"// Tu podmień na swoje
-        );
-
-        // Kategoria (jeśli NewLink przyjmuje też kategorię, żeby przypisać do różnych)
-        List<String> categories = Arrays.asList("Gry", "Muzyka", "Edukacja");
-
-        System.out.println("RADAR 3: Zaczynam dodawać linki...");
-
-        for (int i = 0; i < testUrls.size(); i++) {
-            NewLink newLink = new NewLink();
-            newLink.setUrl(testUrls.get(i));
-
-            // Jeśli w Twoim DTO "NewLink" dodajesz od razu kategorię, odkomentuj to:
-            // newLink.setCategory(categories.get(i));
-
-            System.out.println("RADAR 4." + (i + 1) + ": Kucharz gotuje link " + (i + 1) + "...");
-
-            try {
-                videoService.processVideo(newLink, user);
-                System.out.println(" Sukces dla linku " + (i + 1));
-            } catch (Exception e) {
-                System.out.println(" BŁĄD przy linku " + (i + 1) + ": " + e.getMessage());
-            }
-        }
-
-        System.out.println("RADAR 5: Wszystkie linki przetworzone!");
-        return "Zrobione! Odśwież teraz aplikację na telefonie i sprawdź HomeScreen!";
-    }
 }
