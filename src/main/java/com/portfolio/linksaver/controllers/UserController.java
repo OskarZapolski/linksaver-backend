@@ -70,7 +70,7 @@ public class UserController {
     }
 
     @GetMapping("/ping")
-    public ResponseEntity<String> ping(@RequestParam String param) {
+    public ResponseEntity<String> ping() {
         return ResponseEntity.ok("pong");
     }
 
