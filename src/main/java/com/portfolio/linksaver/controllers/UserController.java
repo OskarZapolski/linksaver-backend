@@ -69,6 +69,11 @@ public class UserController {
         return ResponseEntity.ok(tokens);
     }
 
+    @GetMapping("/ping")
+    public ResponseEntity<String> ping(@RequestParam String param) {
+        return ResponseEntity.ok("pong");
+    }
+
     @PostMapping("/auth/refresh-token")
     public ResponseEntity<Map<String, String>> handleRefreshToken(@RequestBody Map<String, String> request) {
         String refreshToken = request.get("refreshToken");
