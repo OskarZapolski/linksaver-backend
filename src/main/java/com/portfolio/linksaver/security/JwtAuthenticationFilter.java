@@ -15,6 +15,8 @@ import com.portfolio.linksaver.entities.User;
 import com.portfolio.linksaver.repositories.UserRepository;
 import com.portfolio.linksaver.services.JwtService;
 
+import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.JwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -48,22 +50,35 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             return;
         }
         final String jwtToken = authHeader.substring(7);
-        final String jwtEmail = jwtService.extractEmail(jwtToken);
 
-        Optional<User> possibleUser = userRepository.findByEmail(jwtEmail);
+        try {
+            final String jwtEmail = jwtService.extractEmail(jwtToken);
 
-        if (possibleUser.isEmpty()) {
+            Optional<User> possibleUser = userRepository.findByEmail(jwtEmail);
+
+            if (possibleUser.isEmpty()) {
+                filterChain.doFilter(request, response);
+                return;
+            }
+            User user = possibleUser.get();
+            if (jwtService.isTokenValid(jwtToken, user)) {
+                UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
+                        user,
+                        null,
+                        List.of(new SimpleGrantedAuthority(user.getRole())));
+                authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+
+                SecurityContextHolder.getContext().setAuthentication(authToken);
+            }
+
+        } catch (ExpiredJwtException e) {
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            response.getWriter().write("JWT token has expired");
             return;
-        }
-        User user = possibleUser.get();
-        if (jwtService.isTokenValid(jwtToken, user)) {
-            UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
-                    user,
-                    null,
-                    List.of(new SimpleGrantedAuthority(user.getRole())));
-            authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-
-            SecurityContextHolder.getContext().setAuthentication(authToken);
+        } catch (JwtException | IllegalArgumentException e) {
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            response.getWriter().write("Invalid JWT token");
+            return;
         }
         filterChain.doFilter(request, response);
 
