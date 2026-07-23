@@ -52,6 +52,17 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         final String jwtToken = authHeader.substring(7);
 
         try {
+            if ("extension_add_only".equals(jwtService.getScope(jwtToken))) {
+                String requestMethod = request.getMethod();
+                String requestURI = request.getRequestURI();
+
+                if (!requestMethod.equals("POST") || !requestURI.endsWith("/video")) {
+                    response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+                    response.getWriter().write("This token can only be used to save new links.");
+                    return;
+                }
+            }
+
             final String jwtEmail = jwtService.extractEmail(jwtToken);
 
             Optional<User> possibleUser = userRepository.findByEmail(jwtEmail);

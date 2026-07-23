@@ -18,8 +18,7 @@ public class RegisterUserService {
     private final JwtService jwtService;
 
     public RegisterUserService(UserRepository userRepository, PasswordEncoder passwordEncoder,
-        JwtService jwtService) 
-    {
+            JwtService jwtService) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.jwtService = jwtService;
@@ -33,11 +32,13 @@ public class RegisterUserService {
             newUser.setPassword(passwordEncoder.encode(newUserData.getPassword()));
             newUser.setUserName(newUserData.getUserName());
             newUser.setAuthProvider(AuthProvider.LOCAL);
-            userRepository.save(newUser);   
+            userRepository.save(newUser);
 
             String accessToken = jwtService.generateAccessToken(newUser);
             String refreshToken = jwtService.generateRefreshToken(newUser);
-            return new Tokens(accessToken, refreshToken);
+            String shareExtensionToken = jwtService.generateShareExtensionToken(newUser);
+
+            return new Tokens(accessToken, refreshToken, shareExtensionToken);
         } else {
             throw new IllegalArgumentException("email is already used");
         }

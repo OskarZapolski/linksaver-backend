@@ -25,5 +25,3 @@ This backend is designed with a focus on security, automation, and clean archite
 - **Web Scraping:** JSoup
 - **AI Integration:** OpenAI API (gpt-4o-mini)
 - **API Documentation:** Swagger / OpenAPI
-
----

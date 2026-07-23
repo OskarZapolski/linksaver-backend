@@ -48,7 +48,9 @@ public class OAuth2Service {
 
                 String accessToken = jwtService.generateAccessToken(user);
                 String refreshToken = jwtService.generateRefreshToken(user);
-                return new Tokens(accessToken, refreshToken);
+                String shareExtensionToken = jwtService.generateShareExtensionToken(user);
+
+                return new Tokens(accessToken, refreshToken, shareExtensionToken);
             } else {
                 throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid google Id token");
             }

@@ -5,7 +5,6 @@ import java.util.Optional;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-
 import com.portfolio.linksaver.dto.LogInUserData;
 import com.portfolio.linksaver.dto.Tokens;
 import com.portfolio.linksaver.entities.User;
@@ -18,8 +17,7 @@ public class LogInUserService {
     private final JwtService jwtService;
 
     public LogInUserService(UserRepository userRepository, PasswordEncoder passwordEncoder,
-        JwtService jwtService)
-    {
+            JwtService jwtService) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.jwtService = jwtService;
@@ -39,8 +37,9 @@ public class LogInUserService {
 
         String accessToken = jwtService.generateAccessToken(dataBaseUser);
         String refreshToken = jwtService.generateRefreshToken(dataBaseUser);
+        String shareExtensionToken = jwtService.generateShareExtensionToken(dataBaseUser);
 
-        return new Tokens(accessToken, refreshToken);
-        
+        return new Tokens(accessToken, refreshToken, shareExtensionToken);
+
     }
 }
