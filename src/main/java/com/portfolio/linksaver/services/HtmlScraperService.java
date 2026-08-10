@@ -9,7 +9,7 @@ import org.jsoup.nodes.Element;
 import org.springframework.stereotype.Service;
 
 import com.portfolio.linksaver.dto.NewLink;
-import com.portfolio.linksaver.dto.TiktokVideoInfo;
+import com.portfolio.linksaver.dto.ScrapedVideoInfo;
 import com.portfolio.linksaver.dto.VideoScrapedData;;
 
 @Service
@@ -28,7 +28,7 @@ public class HtmlScraperService {
         String aiPayload = "";
 
         if (newLink.getUrl().contains("tiktok.com")) {
-            TiktokVideoInfo tiktokVideoInfo = tiktokVideoService.handleTiktokVideo(newLink);
+            ScrapedVideoInfo tiktokVideoInfo = tiktokVideoService.handleTiktokVideo(newLink);
             title = tiktokVideoInfo.getTitle();
             imageUrl = tiktokVideoInfo.getThumbnailUrl();
             aiPayload = title;
@@ -39,8 +39,10 @@ public class HtmlScraperService {
                 imageUrl = getThumbnailImageUrl(doc);
                 title = getTitle(doc);
                 String hashtags = getHashtags(doc);
+                String description = getDescription(doc);
 
                 aiPayload = "Tytuł: " + (title != null ? title : "Brak tytułu") +
+                        ", Opis: " + (description != null ? description : "Brak opisu") +
                         ", Tagi: " + (hashtags != null ? hashtags : "Brak tagów");
 
             } catch (IOException e) {
