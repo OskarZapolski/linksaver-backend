@@ -16,9 +16,11 @@ import com.portfolio.linksaver.dto.VideoScrapedData;;
 public class HtmlScraperService {
 
     private final TiktokVideoService tiktokVideoService;
+    private final InstagramVideoService instagramVideoService;
 
-    public HtmlScraperService(TiktokVideoService tiktokVideoService) {
+    public HtmlScraperService(TiktokVideoService tiktokVideoService, InstagramVideoService instagramVideoService) {
         this.tiktokVideoService = tiktokVideoService;
+        this.instagramVideoService = instagramVideoService;
     }
 
     public VideoScrapedData scrapeVideoData(NewLink newLink) {
@@ -27,10 +29,15 @@ public class HtmlScraperService {
         String imageUrl = "";
         String aiPayload = "";
 
-        if (newLink.getUrl().contains("tiktok.com")) {
+        if (newLink.getUrl().contains("tiktok")) {
             ScrapedVideoInfo tiktokVideoInfo = tiktokVideoService.handleTiktokVideo(newLink);
             title = tiktokVideoInfo.getTitle();
             imageUrl = tiktokVideoInfo.getThumbnailUrl();
+            aiPayload = title;
+        } else if (newLink.getUrl().contains("instagram")) {
+            ScrapedVideoInfo scrapedVideoInfo = instagramVideoService.handleInstagramVideo(newLink);
+            title = scrapedVideoInfo.getTitle();
+            imageUrl = scrapedVideoInfo.getThumbnailUrl();
             aiPayload = title;
         } else {
             Connection connection = setConnection(newLink);
