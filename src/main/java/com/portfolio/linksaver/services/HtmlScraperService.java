@@ -2,10 +2,10 @@ package com.portfolio.linksaver.services;
 
 import java.io.IOException;
 
-import org.jsoup.Connection;
-import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.portfolio.linksaver.dto.NewLink;
@@ -15,12 +15,17 @@ import com.portfolio.linksaver.dto.VideoScrapedData;;
 @Service
 public class HtmlScraperService {
 
+    private static final Logger log = LoggerFactory.getLogger(HtmlScraperService.class);
+
     private final TiktokVideoService tiktokVideoService;
     private final InstagramVideoService instagramVideoService;
+    private final SafeHttpFetcher httpFetcher;
 
-    public HtmlScraperService(TiktokVideoService tiktokVideoService, InstagramVideoService instagramVideoService) {
+    public HtmlScraperService(TiktokVideoService tiktokVideoService, InstagramVideoService instagramVideoService,
+            SafeHttpFetcher httpFetcher) {
         this.tiktokVideoService = tiktokVideoService;
         this.instagramVideoService = instagramVideoService;
+        this.httpFetcher = httpFetcher;
     }
 
     public VideoScrapedData scrapeVideoData(NewLink newLink) {
@@ -40,9 +45,8 @@ public class HtmlScraperService {
             imageUrl = scrapedVideoInfo.getThumbnailUrl();
             aiPayload = title;
         } else {
-            Connection connection = setConnection(newLink);
             try {
-                Document doc = connection.get();
+                Document doc = httpFetcher.fetchDocument(newLink.getUrl());
                 imageUrl = getThumbnailImageUrl(doc);
                 title = getTitle(doc);
                 String hashtags = getHashtags(doc);
@@ -53,22 +57,14 @@ public class HtmlScraperService {
                         ", Tagi: " + (hashtags != null ? hashtags : "Brak tagów");
 
             } catch (IOException e) {
-                throw new RuntimeException(
-                        "Failed to fetch data from the provided URL. The link might be invalid or protected.");
+                log.warn("Nie udało się pobrać strony {}: {}", newLink.getUrl(), e.getMessage());
+                throw new RuntimeException("Invalid URL");
             }
         }
         videoScrapedData.setAiPayload(aiPayload);
         videoScrapedData.setImageUrl(imageUrl);
         return videoScrapedData;
 
-    }
-
-    private Connection setConnection(NewLink newLink) {
-        Connection connection = Jsoup.connect(newLink.getUrl());
-        connection.userAgent("facebookexternalhit/1.1 (+http://www.facebook.com/externalhit_uatext.php)");
-        connection.timeout(5000);
-        connection.referrer("http://www.google.com");
-        return connection;
     }
 
     private String getThumbnailImageUrl(Document doc) {
